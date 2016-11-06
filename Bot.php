@@ -107,8 +107,12 @@ class Bot
 
 	function overpassMapRequest($lat,$lon,$tag)
 	{
+		$string ='';
+		foreach ($tag as $value)
+			$string .= 'node'.$value."(around:10000.0,$lat,$lon);";
+
 		//cerco tutti gli elementi nel raggio di 10 km.
-		$parameters = array('data'=>"[out:json];node(around:10000.0,$lat,$lon)$tag;out body;");
+		$parameters = array('data'=>"[out:json];($string); out body;");
 		$url = OVERPASS_API_URL.'?'.http_build_query($parameters);
 		$handle = curl_init($url);
 		curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);

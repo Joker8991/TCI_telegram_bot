@@ -2,10 +2,10 @@
 
 class Tools
 {
-	private $nomiTag = array('defibrillatore' => array('plur' => 'defibrillatori', 'tag' =>'[emergency=defibrillator]'),
-					'estintore' =>array('plur' => 'estintori', 'tag' => '[emergency=fire_extinguisher]'),
-					'idrante' => array('plur' => 'idranti', 'tag' => '[emergency=fire_hydrant][emergency=fire_hose]'),
-					'punto di raccolta' => array('plur' => 'punti di raccolta', 'tag' => '[assembly_point]'));
+	private $nomiTag = array('defibrillatore' => array('plur' => 'defibrillatori', 'tag' =>array('[emergency=defibrillator]')),
+					'estintore' =>array('plur' => 'estintori', 'tag' => array('[emergency=fire_extinguisher]')),
+					'idrante' => array('plur' => 'idranti', 'tag' => array('[emergency=fire_hydrant]','[emergency=fire_hose]')),
+					'punto di raccolta' => array('plur' => 'punti di raccolta', 'tag' => array('[assembly_point]')));
 
 	private $keyboards = array(
 		'mainKeyboard' => array(
@@ -32,6 +32,7 @@ class Tools
 	public function getTag($name)
 	{
 		if(isset($this->nomiTag[$name])){
+
 			return $this->nomiTag[$name]['tag'];
 		}
 		return null; 
