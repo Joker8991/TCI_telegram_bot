@@ -116,7 +116,8 @@ class GestoreMessaggi
     		case 'defibrillatore':
     		case 'estintore':
     		case 'idrante':
-    		case 'punto di raccolta':
+    		case 'area di emergenza':
+    		case 'ospedale':
     			$response = $text;
     			$keyboard = $this->tools->setKeyboard('locationKeyboard',true);
     			break;
@@ -135,6 +136,8 @@ class GestoreMessaggi
 		$keyboard = $this->tools->setKeyboard('mainKeyboard');
 		$parameters = array('chat_id' => $chatId, 'reply_markup' => $keyboard);
 		$tag = $this->tools->getTag($replytoMessage);
+		$dist = $this->tools->getDistance($replytoMessage);
+		$distString = $this->tools->getDistString($dist);
 		if(isset($tag))
 		{
 			if(DEBUG)
@@ -144,19 +147,39 @@ class GestoreMessaggi
 				$elements = $elements['elements'];
 			}
 			else
-				$elements = $bot->overpassMapRequest($location['latitude'], $location['longitude'], $tag);
-			
+				$elements = $bot->overpassMapRequest($location['latitude'], $location['longitude'], $tag, $dist);
+
 			$numelem = count($elements);
-			$parameters['text'] = "Ho trovato $numelem {$this->tools->pluralize($replytoMessage, $numelem)} nel raggio di 10 km.";
+			$parameters['text'] = "Ho trovato $numelem {$this->tools->pluralize($replytoMessage, $numelem)} nel raggio di $distString.";
 			$bot->apiRequest('sendMessage',$parameters);
 
 			if($numelem>0)
 			{
-				$this->tools->ordinaArray($location, $elements);
 				foreach ($elements as $key)
 				{
-					$locParameters = array('chat_id' => $chatId, 'latitude' => $key['lat'], 'longitude' => $key['lon']);
+					if($key['type']!= 'node')
+					{
+						$lat = $key['center']['lat'];
+						$lon = $key['center']['lon'];					
+					}
+					else
+					{
+						$lat = $key['lat'];
+						$lon = $key['lon'];	
+					}
+					$locParameters = array('chat_id' => $chatId, 'latitude' => $lat, 'longitude' => $lon);
 					$bot->apiRequest('sendLocation', $locParameters);
+					if(isset($key['tags']['name']))
+					{
+						$nameAddress = $key['tags']['name'];
+						if(isset($key['tags']['addr:street']))
+							$nameAddress.="\n".$key['tags']['addr:street'];
+						if(isset($key['tags']['addr:housenumber']))
+							$nameAddress.=' '.$key['tags']['addr:housenumber'];
+						
+						$parameters['text'] = "$nameAddress";
+						$bot->apiRequest('sendMessage', $parameters);			
+					}
 				}
 			}
 		}

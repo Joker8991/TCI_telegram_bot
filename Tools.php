@@ -2,18 +2,19 @@
 
 class Tools
 {
-	private $nomiTag = array('defibrillatore' => array('plur' => 'defibrillatori', 'tag' =>array('[emergency=defibrillator]')),
-					'estintore' =>array('plur' => 'estintori', 'tag' => array('[emergency=fire_extinguisher]')),
-					'idrante' => array('plur' => 'idranti', 'tag' => array('[emergency=fire_hydrant]','[emergency=fire_hose]')),
-					'punto di raccolta' => array('plur' => 'punti di raccolta', 'tag' => array('[assembly_point]')));
+	private $nomiTag = array('defibrillatore' => array('plur' => 'defibrillatori', 'tag' =>array('[emergency=defibrillator]'), 'distance' => 500),
+					'estintore' =>array('plur' => 'estintori', 'tag' => array('[emergency=fire_extinguisher]'),'distance' => 500),
+					'idrante' => array('plur' => 'idranti', 'tag' => array('[emergency=fire_hydrant]','[emergency=fire_hose]'),'distance' => 1000),
+					'ospedale' => array('plur' => 'ospedali', 'tag' => array('[amenity=hospital][emergency=yes]'),'distance' => 10000), 
+					'area di emergenza' => array('plur' => 'aree di emergenza', 'tag' => array('[emergency=assembly_point]'), 'distance' => 500));
 
 	private $keyboards = array(
 		'mainKeyboard' => array(
        				array('Emergenze'),
        				array('Fabbisogni','Alloggi')),
 		'emergencyKeyboard'=> array(
-       				array('Defibrillatore','Punto di raccolta'),
-       				array('Estintore','Idrante'),
+       				array('Defibrillatore','Estintore','Idrante'),
+       				array('Area di emergenza', 'Ospedale'),
        				array('Annulla')),
 		'locationKeyboard' => array(
        				array(array('text'=>'Invia la mia posizione', 'request_location' => true)),
@@ -28,7 +29,7 @@ class Tools
 		return $name;
 	}
 
-
+	//Ritorna il nome del tag OSM associato all'oggetto da cercare
 	public function getTag($name)
 	{
 		if(isset($this->nomiTag[$name])){
@@ -38,42 +39,28 @@ class Tools
 		return null; 
 	}
 
+	//Ritorna la distanza massima cui cercare l'oggetto ripetto alla posizione dell'utente
+	public function getDistance($name)
+	{
+		if(isset($this->nomiTag[$name])){
+
+			return $this->nomiTag[$name]['distance'];
+		}
+		return null; 
+	}
+
+	public function getDistString($dist)
+	{
+		if($dist>999)
+			return (($dist/1000).' km');
+		return "$dist m";
+	}
+
 
 	public function setKeyboard($keyboardName,$resize =false)
 	{
 		return array('keyboard'=>$this->keyboards[$keyboardName],'resize_keyboard' => $resize);
 	}
-
-
-	function comparaDist($a, $b)
-		{
-        	if ($a['dist'] == $b['dist'])
-        	{
-        		return 0;
-    		}
-    		return ($a['dist'] < $b['dist']) ? -1 : 1;
-		}
-	
-	/* Al momento l'ordinamento viene fatto in base alla distanza in linea d'aria
-	 * tra la posizione inviata e i risultati sulla mappa.
-	 * Sarebbe meglio tenere conto delle strade
-	 */
-	function ordinaArray($myLocation, &$src)
-	{
-		$mylat = $myLocation['latitude'];
-		$mylon = $myLocation['longitude'];
-
-		foreach($src as &$elem)
-		{	
-			$x = $elem['lat'] - $mylat;
-			$y = $elem['lon'] - $mylon;
-			$dist = sqrt($x*$x + $y*$y);
-			$elem['dist'] = $dist;
-		}
-				
-		usort($src, array($this, "comparaDist"));
-    }
-
 }
 
 ?>

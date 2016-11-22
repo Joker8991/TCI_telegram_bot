@@ -105,15 +105,19 @@ class Bot
 	}
 
 
-	function overpassMapRequest($lat,$lon,$tag)
+	function overpassMapRequest($lat,$lon,$tag, $dist)
 	{
 		$string ='';
 		foreach ($tag as $value)
-			$string .= 'node'.$value."(around:10000.0,$lat,$lon);";
+			$string .= 'node'.$value."(around:$dist.0,$lat,$lon);"
+					.'way'.$value."(around:$dist.0,$lat,$lon);"
+					.'relation'.$value."(around:$dist.0,$lat,$lon);";
+		
 
 		//cerco tutti gli elementi nel raggio di 10 km.
-		$parameters = array('data'=>"[out:json];($string); out body;");
+		$parameters = array('data'=>"[out:json];($string); out center 5;");
 		$url = OVERPASS_API_URL.'?'.http_build_query($parameters);
+
 		$handle = curl_init($url);
 		curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 	  	curl_setopt($handle, CURLOPT_CONNECTTIMEOUT, 5);
@@ -141,7 +145,7 @@ class Bot
 		curl_setopt($handle, CURLOPT_TIMEOUT, 10);
 		curl_setopt($handle, CURLOPT_HEADER, true);
 		curl_setopt($handle, CURLOPT_HTTPHEADER, array( 'Accept: application/json'));
-
+		
 		$header_size=true;
 		$ret = $this -> exec_curl_request($handle, $header_size);
 		

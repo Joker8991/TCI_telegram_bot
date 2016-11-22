@@ -4,9 +4,9 @@
  *ad impostare il webhook
  */
 
-define('BOT_TOKEN', 'BOT_TOKEN_HERE');
+//define('BOT_TOKEN', 'BOT_TOKEN_HERE');
 //settare WEBHOOK_URL = '' se si vuole rimuovere un webhook esistente
-define('WEBHOOK_URL', 'APP_ROOT_HERE/webhook.php');
+//define('WEBHOOK_URL', 'APP_ROOT_HERE/webhook.php');
 
 $url = "https://api.telegram.org/bot%s/setWebhook?url=%s";
 $url = sprintf($url, BOT_TOKEN, WEBHOOK_URL);
